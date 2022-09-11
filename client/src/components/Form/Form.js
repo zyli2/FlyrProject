@@ -14,34 +14,43 @@ import { Clear } from '@material-ui/icons';
 // that way we can go from "Creating a memory" to "Editing a memory"
 // for the selected post that is identified by its id.
 const Form = ({ currentId, setCurrentId }) => {
-    const [postData, setPostData] = useState({
-        // creator/wtv: '' means it's an empty string
-        creator: '', title: '', message: '', tags: '', selectedFile: ''});
-    const post = useSelector((state) => currentId ? state.posts.find((p) => p._id == currentId) : null);
+    const [postData, setPostData] = useState({ title: '', message: '', tags: '', selectedFile: ''});
+    const post = useSelector((state) => (currentId ? state.posts.find((message) => message._id === currentId) : null));
     const classes = useStyles();
     const dispatch = useDispatch();
+    const user = JSON.parse(localStorage.getItem('profile'));
 
     // we run this function when the post gets updated from nothing to a post
     useEffect(() => {
         if (post) setPostData(post);
-    }, [post])
-
-// once the user press submit, we want to send a post request with all the user's data
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (currentId) {
-            // remember that to do so, we need an id so currentId is the first paramter
-            dispatch(updatePost(currentId, postData));
-        } else {
-            dispatch(createPost(postData));
-        }
-        clear();
-    }
+    }, [post]);
 
     const clear = () => {
-        setCurrentId(null);
-        setPostData({creator: '', title: '', message: '', tags: '', selectedFile: ''});
+        setCurrentId(0);
+        setPostData({ title: '', message: '', tags: '', selectedFile: ''});
+    };
+
+// once the user press submit, we want to send a post request with all the user's data
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (currentId === 0) {
+        dispatch(createPost({ ...postData, name: user?.result?.name }));
+        clear();
+        } else {
+        dispatch(updatePost(currentId, { ...postData, name: user?.result?.name }));
+        clear();
+        }
+    };
+
+    if(!user?.result?.name) {
+        return (
+            <Paper className={classes.paper}>
+                <Typography variant="h6" align="center">
+                    Please Sign In to start your experience in Flyr!!!
+                </Typography>
+            </Paper>
+        );
     }
 
     return (
@@ -53,8 +62,7 @@ const Form = ({ currentId, setCurrentId }) => {
             // all the textfield will be fulfilled
         <Paper className={classes.paper}>
             <form autoComplete="off" noValidate className={`${classes.root} ${classes.form}`} onSubmit={handleSubmit}>
-                <Typography variant="h6">{currentId ? 'Editing' : 'Creating'} a Memory</Typography>
-                <TextField name="creator" variant="outlined" label="Creator" fullWidth value={postData.creator} onChange={(e) => setPostData({ ...postData, creator: e.target.value })}/>
+                <Typography variant="h6">{currentId ? 'Edit' : 'Create'} a Post</Typography>
                 <TextField name="title" variant="outlined" label="Title" fullWidth value={postData.title} onChange={(e) => setPostData({ ...postData, title: e.target.value })}/>
                 <TextField name="message" variant="outlined" label="Message" fullWidth value={postData.message} onChange={(e) => setPostData({ ...postData, message: e.target.value })}/>
                 <TextField name="tags" variant="outlined" label="Tags" fullWidth value={postData.tags} onChange={(e) => setPostData({ ...postData, tags: e.target.value.split(',') })}/>

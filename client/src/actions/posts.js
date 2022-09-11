@@ -1,6 +1,6 @@
 // the * as means we import everything from actions as api 
 import { FETCH_ALL, CREATE, UPDATE, DELETE, LIKE} from '../constants/actionTypes';
-import * as api from '../api';
+import * as api from '../api/index';
 
 // Actions Creators
 // functions that return actions
@@ -38,13 +38,13 @@ export const createPost = (post) => async (dispatch) => {
 
 export const updatePost = (id, post) => async (dispatch) => {
     try {
-        const { data } = await api.updatePost(id, post);
-
-        dispatch({ type: UPDATE, payload: data })
+      const { data } = await api.updatePost(id, post);
+  
+      dispatch({ type: UPDATE, payload: data });
     } catch (error) {
-        console.log(error);
+      console.log(error);
     }
-};
+  };
 
 export const deletePost = (id) => async (dispatch) => {
     try {
